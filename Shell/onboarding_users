@@ -10,6 +10,16 @@ CSV_FILE=names.csv
 # Create a variable for the developers group
 GROUP_NAME=developers
 
+# setting up the ssh directory for the user home directory with skel
+# This is done using the /etc/skel directory
+SSH_FILE=/etc/skel/.ssh
+
+#Create password for the  user
+PASSWORD=password
+
+#Create a variable for the public key file
+AUTH=authorized_keys
+
 # Create a conditional statement if the developers group exist
 # Must be in the /etc directory to check the getent group developers
 if [ $(getent group developers) ];
@@ -19,4 +29,33 @@ else
     sudo groupadd $GROUP_NAME
     echo group successfully created
 fi
+
+# create a conditional statement if the ssh folder exists in the skel directory
+if [ -d "$SSH_FILE" ];
+then
+    echo "$SSH_FILE already exist"
+else
+    sudo mkdir -p $SSH_FILE
+    sudo bash -c "cat $AUTH >> $SSH_FILE/authorized_keys"
+
+
+# create a user on the server which reads from the names.csv
+# IFS : Internal Field Seperator: to seperates context in a file
+# Using IFS to check for each username in the names.csv file 
+while IFS= read USERNAME
+    do
+        #check if the user already exists 
+        if [ $(getent passwd USERNAME) ];
+        then
+            echo $USERNAME already exists 
+        else
+            sudo passwd -m -G $GROUP_NAME $USERNAME
+            sudo echo -e "$PASSWORD/n$PASSWORD" | sudo passwd "${USERNAME}"
+            sudo passwd -x 7 ${USERNAME}
+            sudo chmod 700 /home/$USERNAME/.ssh
+            sudo chmod 644 /home/$USERNAME/.ssh/authorized_keys
+            sudo echo $USERNAME successfully created
+        fi
+    done > $CSV_FILE
+    
 
