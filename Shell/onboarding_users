@@ -1,0 +1,22 @@
+#!bin/bash
+
+
+# Automation tasks which creates users on the servers
+# Reads the users in the names.csv file and check if not exists, then create
+
+# Create a variabe name for the names.csv file
+CSV_FILE=names.csv
+
+# Create a variable for the developers group
+GROUP_NAME=developers
+
+# Create a conditional statement if the developers group exist
+# Must be in the /etc directory to check the getent group developers
+if [ $(getent group developers) ];
+then
+    echo developers group already exists
+else
+    sudo groupadd $GROUP_NAME
+    echo group successfully created
+fi
+
