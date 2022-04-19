@@ -36,6 +36,7 @@ then
     echo "$SSH_FILE already exist"
 else
     sudo mkdir -p $SSH_FILE
+    sudo touch $SSH_FILE/$AUTH
     sudo bash -c "cat $AUTH >> $SSH_FILE/authorized_keys"
 
 
@@ -49,13 +50,14 @@ while IFS= read USERNAME
         then
             echo $USERNAME already exists 
         else
-            sudo passwd -m -G $GROUP_NAME $USERNAME
+            sudo passwd -m -G $GROUP_NAME -s /bin/bash $USERNAME
             sudo echo -e "$PASSWORD/n$PASSWORD" | sudo passwd "${USERNAME}"
             sudo passwd -x 7 ${USERNAME}
             sudo chmod 700 /home/$USERNAME/.ssh
             sudo chmod 644 /home/$USERNAME/.ssh/authorized_keys
             sudo echo $USERNAME successfully created
         fi
-    done > $CSV_FILE
-    
+    done > $CSV_FILE  
+
+exit 0 
 
